@@ -21,19 +21,19 @@ def load_model():
 def load_data():
     # load movies data
     movies_data_path = os.path.join(DATASET_ABS_PATH, 'movie-titles.csv')
-    df_movies = pd.read_csv(movies_data_path)
+    df_movies = pd.read_csv(movies_data_path, names=['iditem', 'title'])
 
     # load tags data
     tags_path = os.path.join(DATASET_ABS_PATH, 'movie-tags.csv')
-    df_tags = pd.read_csv(tags_path, encoding="ISO-8859-1")  # i had to use another encoding for this file, as it was not in utf-8 format
+    df_tags = pd.read_csv(tags_path, encoding="ISO-8859-1", names=['iditem', 'tag'])  # i had to use another encoding for this file, as it was not in utf-8 format
 
     # load ratings data
     ratings_path = os.path.join(DATASET_ABS_PATH, 'ratings.csv')
-    df_ratings = pd.read_csv(ratings_path)
+    df_ratings = pd.read_csv(ratings_path, names=['iduser', 'iditem', 'rating'])
 
     # load users data
     users_path = os.path.join(DATASET_ABS_PATH, 'users.csv')
-    df_users = pd.read_csv(users_path)
+    df_users = pd.read_csv(users_path, names=['iduser', 'username'])
 
     return {
         'movies': df_movies,

@@ -1,7 +1,22 @@
-from tf_idf import model as tf_idf
+import os
+from tf_idf.managers import MoviesDatasetManager
+
+# ------------------------------------------------------------
+
+
+DATASET_REL_PATH = f"{os.path.dirname(__file__)}/rs-cour-dataset"
+DATASET_ABS_PATH = os.path.abspath(DATASET_REL_PATH)
+
+DATASET_OUTPUT_PATH = f"{os.path.dirname(__file__)}/model/tfidf.pickle"
+
+# ------------------------------------------------------------
+
 
 if __name__ == '__main__':
-    print("Hello World")
+    # ------------ load data and save it to .pickle file ------------
+    # ds_mgr = MoviesDatasetManager.from_csv_folder(DATASET_ABS_PATH)
+    # ds_mgr.save_dataset(DATASET_OUTPUT_PATH)
 
-    dataset = tf_idf.load_data()
-    tf_idf.save_model(dataset)
+    # ------------ load .pickle dataset ------------
+    ds_mgr = MoviesDatasetManager(dataset_path=DATASET_OUTPUT_PATH)
+    k = 0
