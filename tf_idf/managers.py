@@ -156,4 +156,9 @@ class MoviesDatasetManager(object):
         product_profiles = None
         user_profiles = None
 
+        # get unique tags
+        unique_tags = self.df_tags['tag'].unique()
+
+        
+
         return product_profiles, user_profiles
