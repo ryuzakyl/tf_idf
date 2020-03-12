@@ -19,4 +19,4 @@ if __name__ == '__main__':
 
     # ------------ load .pickle dataset ------------
     ds_mgr = MoviesDatasetManager(dataset_path=DATASET_OUTPUT_PATH)
-    k = 0
+    product_profiles, user_profiles = ds_mgr.build_profiles()

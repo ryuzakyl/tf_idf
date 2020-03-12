@@ -151,3 +151,9 @@ class MoviesDatasetManager(object):
     @staticmethod
     def __filter_details_by_column_value(df, column_name, value):
         return df.loc[df[column_name] == value]
+
+    def build_profiles(self):
+        product_profiles = None
+        user_profiles = None
+
+        return product_profiles, user_profiles
