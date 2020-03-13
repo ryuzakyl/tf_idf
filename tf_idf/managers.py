@@ -186,7 +186,7 @@ class MoviesDatasetManager(object):
             for i in range(n_movies)
         ])
 
-        # normalizing terms to avoid 
+        # normalizing TF-IDF matrix
         sum_of_rows = tf_idf.sum(axis=1)
         tf_idf_norm = tf_idf / sum_of_rows[:, np.newaxis]
 
