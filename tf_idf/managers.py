@@ -1,8 +1,11 @@
 import os
+import math
 import pickle
 
 import numpy as np
 import pandas as pd
+
+from .utils import build_matrix
 
 # ------------------------------------------------------------
 
@@ -149,16 +152,62 @@ class MoviesDatasetManager(object):
     # -------------------------------------------------
 
     @staticmethod
-    def __filter_details_by_column_value(df, column_name, value):
+    def __filter_by_column_value(df, column_name, value):
         return df.loc[df[column_name] == value]
 
-    def build_profiles(self):
-        product_profiles = None
-        user_profiles = None
+    def __build_product_profiles(self):
+        # get unique tags and movies
+        unique_tags = self.df_tags['tag'].unique()
+        unique_movies = self.df_movies['iditem'].unique()[:2]
+
+        # build empty products profile matrix
+        n_movies = len(unique_movies)
+
+        # compute idf
+        idf = np.array([
+            # amount of movies with given tag
+            math.log(n_movies / len(self.df_tags.loc[self.df_tags['tag'] == t, 'iditem'].unique()))
+            for t in unique_tags
+        ])
+
+        # compute tf matrix
+        tf = np.array([[
+                # amount of times the movie was tagged with a specific tag
+                self.df_tags.loc[(self.df_tags['tag'] == t) & (self.df_tags['iditem'] == m)].shape[0]
+                for t in unique_tags
+            ]
+            for m in unique_movies
+        ])
+
+        # compute TF-IDF matrix
+        tf_idf = np.array([
+            # pairwise product (same as foreach etiqueta TFproducto,etiqueta * IDFetiqueta)
+            np.multiply(tf[i, :], idf)
+            for i in range(n_movies)
+        ])
+
+        # normalizing terms to avoid 
+        sum_of_rows = tf_idf.sum(axis=1)
+        tf_idf_norm = tf_idf / sum_of_rows[:, np.newaxis]
+
+        # build matrix
+        matrix = build_matrix(tf_idf_norm, unique_movies, unique_tags)
+
+        return matrix
+
+    def __build_user_profiles(self):
+        users_profile = None
 
         # get unique tags
-        unique_tags = self.df_tags['tag'].unique()
+        # unique_tags = self.df_tags['tag'].unique()
 
-        
+        return users_profile
 
-        return product_profiles, user_profiles
+    def build_profiles(self):
+        # build the products profile matrix
+        products_profile = self.__build_product_profiles()
+
+        # build the users profile matrix
+        users_profile = self.__build_user_profiles()
+
+        return products_profile, users_profile
