@@ -158,7 +158,7 @@ class MoviesDatasetManager(object):
     def __build_product_profiles(self):
         # get unique tags and movies
         unique_tags = self.df_tags['tag'].unique()
-        unique_movies = self.df_movies['iditem'].unique()[:2]
+        unique_movies = self.df_movies['iditem'].unique()
 
         # build empty products profile matrix
         n_movies = len(unique_movies)
@@ -195,19 +195,64 @@ class MoviesDatasetManager(object):
 
         return matrix
 
-    def __build_user_profiles(self):
-        users_profile = None
+    # computes user rating to movie
+    def __user_rating_to_movie(self, movie, user):
+        # get user review(s) over specified movie
+        reviews = self.df_ratings.loc[(self.df_ratings['iditem'] == movie) & (self.df_ratings['iduser'] == user)]
 
-        # get unique tags
-        # unique_tags = self.df_tags['tag'].unique()
+        # return 0 if no rating is issued
+        if reviews.shape[0] < 1:
+            return 0.0
 
-        return users_profile
+        return reviews['rating'].mean()
+
+    def __build_user_profiles(self, tf_idf):
+        # get unique tags and movies
+        unique_tags = self.df_tags['tag'].unique()
+        unique_movies = self.df_movies['iditem'].unique()
+        unique_users = self.df_users['iduser'].unique()
+
+        # [n_users x 1]
+        # compute average/mean rating per user
+        r_avg_user = np.array([
+            self.df_ratings.loc[self.df_ratings['iduser'] == u]['rating'].mean()
+            for u in unique_users
+        ])
+
+        # [n_movies x n_users]
+        # compute users ratings over movies (0 for no rating registered)
+        r_up = np.array([[
+                self.__user_rating_to_movie(m, u)
+                for u in unique_users
+            ]
+            for m in unique_movies
+        ])
+
+        # [n_movies x n_users]
+        # normalize previous matrix (substract user average rating from each row)
+        w_up = r_up - r_avg_user
+
+        # [n_users x n_tags]
+        # users profile computation
+        data = np.array([[
+                # dot product (for all products: sum(tf_idf * w_up))
+                np.dot(tf_idf[:, j], w_up[:, i])
+                for j in range(len(unique_tags))
+            ]
+            for i in range(len(unique_users))
+        ])
+
+        # build matrix
+        matrix = build_matrix(data, unique_users, unique_tags)
+
+        return matrix
 
     def build_profiles(self):
         # build the products profile matrix
         products_profile = self.__build_product_profiles()
 
         # build the users profile matrix
-        users_profile = self.__build_user_profiles()
+        tf_idf = products_profile.values
+        users_profile = self.__build_user_profiles(tf_idf)
 
         return products_profile, users_profile
